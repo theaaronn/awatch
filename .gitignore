@@ -59,6 +59,7 @@ logs/
 
 # Docker
 .env
+.env.example
 
 # Database
 *.db

@@ -495,3 +495,31 @@ For managed/commercial licensing: _(coming soon)_
 ---
 
 **Made with ❤️ for engineers tired of CloudWatch bills.**
+
+---
+
+## Cleanup
+
+Free up RAM and disk space after testing/development:
+
+```bash
+# Stop all containers
+docker-compose --profile testing down
+
+# Remove containers, networks, and volumes (frees disk space)
+docker-compose --profile testing down -v
+
+# Remove all unused Docker resources (images, build cache, etc.)
+docker system prune -a -f --volumes
+
+# Check Docker disk usage
+docker system df
+```
+
+To completely remove everything including the PostgreSQL data:
+
+```bash
+docker-compose --profile testing down -v --remove-orphans
+docker volume prune -f
+```
+sudo systemctl stop docker docker.socket containerd

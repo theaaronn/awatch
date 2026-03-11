@@ -1,0 +1,13 @@
+apiVersion: 1
+datasources:
+  - name: InfluxDB-Awatch
+    type: influxdb
+    access: proxy
+    url: http://influxdb:8086
+    jsonData:
+      version: Flux
+      organization: ${INFLUXDB_ORG}
+      defaultBucket: metrics
+    secureJsonData:
+      token: ${INFLUXDB_TOKEN}
+    isDefault: true

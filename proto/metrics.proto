@@ -1,0 +1,104 @@
+syntax = "proto3";
+
+package awatch.metrics.v1;
+
+option go_package = "github.com/awatch/agent/pkg/proto;metrics";
+option py_generic_services = true;
+
+service MetricsService {
+  // Bidirectional streaming RPC for continuous metrics submission
+  // Client sends: stream of MetricBatch
+  // Server responds: stream of StreamAck
+  rpc StreamMetrics(stream MetricBatch) returns (stream StreamAck);
+
+  // Unary RPC for health checking
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+// =============================================================================
+// Message Types
+// =============================================================================
+
+// Individual metric data point
+// Represents a single metric measurement from the agent
+message Metric {
+  // Type of metric: "cpu", "ram", "network_in", "network_out", "disk_read", "disk_write"
+  string metric_type = 1;
+  
+  // Numeric value of the metric
+  double value = 2;
+  
+  // Unit of measurement: "percent", "bytes", "bytes_per_sec"
+  string unit = 3;
+  
+  // Unix timestamp in milliseconds
+  int64 timestamp = 4;
+}
+
+// Batch of metrics from agent
+// Contains multiple metric data points along with metadata
+message MetricBatch {
+  // Unique identifier of the agent
+  string agent_id = 1;
+  
+  // Server hostname
+  string hostname = 2;
+  
+  // Server IP address
+  string ip_address = 3;
+  
+  // Array of metric data points
+  repeated Metric metrics = 4;
+  
+  // Batch collection timestamp (Unix milliseconds)
+  int64 collected_at = 5;
+  
+  // Monotonically increasing sequence number
+  uint64 batch_sequence = 6;
+}
+
+// Acknowledgment from broker
+// Sent by server in response to MetricBatch
+message StreamAck {
+  // Whether the batch was accepted
+  bool success = 1;
+  
+  // Status message or error description
+  string message = 2;
+  
+  // Sequence number being acknowledged
+  uint64 batch_sequence = 3;
+  
+  // Server timestamp of acknowledgment (Unix milliseconds)
+  int64 timestamp = 4;
+}
+
+// Health check request
+message HealthCheckRequest {
+  // Agent requesting health check
+  string agent_id = 1;
+}
+
+// Health check response
+message HealthCheckResponse {
+  // "healthy" or "unhealthy"
+  string status = 1;
+  
+  // Version of broker service
+  string broker_version = 2;
+  
+  // Broker uptime in seconds
+  int64 uptime_seconds = 3;
+}
+
+// Error response
+message ErrorResponse {
+  // Error code (use standard gRPC status codes)
+  int32 code = 1;
+  
+  // Human-readable error message
+  string message = 2;
+  
+  // Additional error context
+  string details = 3;
+}
